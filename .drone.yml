@@ -1,0 +1,14 @@
+workspace:
+  base: /go
+  path: src/templatego
+pipeline:
+   backend:
+     image: golang
+     environment:
+       # - GO111MODULE=on
+       - GOPROXY=proxy.golang.cn
+     commands:
+       - make fmt-check
+       - make vet
+       - go test ./...
+       - make

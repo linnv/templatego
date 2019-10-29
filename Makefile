@@ -13,7 +13,7 @@ LDFLAGS += -X "github.com/linnv/logx/version.GITBRANCH=$(shell git rev-parse --a
 VERSION = $(shell git describe --tags --dirty)
 GITBRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 
-.PHONY: all linux clean pack
+.PHONY: all linux clean pack fmt-check fmt vet
 
 all: $(TARGET)
 
@@ -51,3 +51,21 @@ pack:$(TARGET)
 	@rm $(TARGET)
 	@echo "--->>done: new app built in [$(TARGETAPP).tar.gz]"
 
+GOFMT ?= gofmt "-s"
+GO ?= go
+PACKAGES ?= $(shell $(GO) list ./...)
+SOURCES ?= $(shell find . -name "*.go" -type f)
+
+fmt-check:
+	@diff=$$($(GOFMT) -d $(SOURCES)); \
+	if [ -n "$$diff" ]; then \
+		echo "Please run 'make fmt' and commit the result:"; \
+		echo "$${diff}"; \
+		exit 1; \
+	fi;
+
+fmt:
+	$(GOFMT) -w $(SOURCES)
+
+vet:
+	$(GO) vet $(PACKAGES)
