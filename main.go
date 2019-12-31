@@ -12,13 +12,15 @@ import (
 	"time"
 
 	"github.com/linnv/logx"
-	"github.com/linnv/templatego/api"
-	conf "github.com/linnv/templatego/config"
 
 	"github.com/gin-gonic/gin"
 	"github.com/linnv/simdog/metric"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+
+	"qnmock/api"
+	conf "qnmock/config"
+	"qnmock/internal/grpc"
 )
 
 func Mid() gin.HandlerFunc {
@@ -34,6 +36,7 @@ func main() {
 	config := conf.InitConfig()
 
 	api.Init()
+	grpc.Init()
 
 	// gin.SetMode(gin.ReleaseMode)
 	exit := make(chan struct{})
@@ -52,7 +55,7 @@ func main() {
 	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	router.POST("/metrics", gin.WrapH(promhttp.Handler()))
 
-	router.POST("/hello", api.Hello)
+	router.POST("/gcable", api.Hello)
 
 	port := ":" + config.ServerPort
 	server := &http.Server{
@@ -73,12 +76,15 @@ func main() {
 		}
 	}()
 
+	grpcServer := grpc.StartEngine(exit)
+
 	log.Printf("gin run on port %s\n", port)
 	sigChan := make(chan os.Signal, 2)
 	signal.Notify(sigChan, syscall.SIGHUP, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM)
 	log.Print("use c-c to exit: \n")
 	<-sigChan
 
+	grpcServer.GracefulStop()
 	close(exit)
 	ctx := context.Background()
 	if err := server.Shutdown(ctx); err != nil {

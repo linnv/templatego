@@ -4,7 +4,7 @@ GO        := go
 GOBUILD   := GOPROXY=https://goproxy.cn GO111MODULE=on GOPATH=$(GOPATH) CGO_ENABLED=0 $(GO) build $(BUILD_FLAG)
 GOTEST    := GOPATH=$(GOPATH) CGO_ENABLED=1 $(GO) test -p 3
 OSLINUX   := GOARCH=amd64  GOOS=linux
-TARGET= templatego
+TARGET= qnmock
 
 LDFLAGS += -X "github.com/linnv/logx/version.VERSION=$(shell git describe --tags --dirty)"
 LDFLAGS += -X "github.com/linnv/logx/version.BUILDTIME=$(shell date '+%Y-%m-%d %H:%M:%S')"

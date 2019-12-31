@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -11,13 +12,15 @@ import (
 	"github.com/linnv/logx"
 	"github.com/opentracing/opentracing-go"
 
-	conf "github.com/linnv/templatego/config"
+	conf "qnmock/config"
 )
 
 var config *conf.Configuration
+var addressGcables *conf.AddressGcables
 
 func Init() {
 	config = conf.Config()
+	addressGcables = conf.GetAddressGcables()
 }
 
 func Hello(c *gin.Context) {
@@ -138,4 +141,37 @@ func HelloClient(c *gin.Context) {
 		logx.Errorf(ctx.GetCurLogCtx()+" err: %+v write count:%d\n", err, n)
 	}
 	return
+}
+
+var ERR_PARAMETER_EMPTY = "参数[%s]不能为空"
+
+type RespAddrsMatch struct {
+	IsNormal      bool `json:"IsNormal"`
+	IsNormalMaybe bool `json:"IsNormalMaybe"` //if true, addr should be more precisely
+}
+
+func AddrsMatch(c *gin.Context) {
+	r := c.Request
+	addr := r.FormValue("addr")
+	if len(addr) < 1 {
+		c.AbortWithStatusJSON(401, fmt.Sprintf(ERR_PARAMETER_EMPTY, "addr"))
+		return
+	}
+
+	ctx := &Ctx{}
+	resp := RespAddrsMatch{}
+	if addressGcables.MatchShort(addr) {
+		resp.IsNormal = true
+	} else if addressGcables.Match(addr) {
+		resp.IsNormalMaybe = true
+	}
+
+	bs, err := json.Marshal(resp)
+	if err != nil {
+		c.AbortWithStatusJSON(401, err)
+	}
+
+	if n, err := c.Writer.Write(bs); err != nil {
+		logx.Errorf(ctx.GetCurLogCtx()+" err: %+v write count:%d\n", err, n)
+	}
 }

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"flag"
 	"io/ioutil"
 	"net/http"
@@ -17,10 +18,11 @@ import (
 )
 
 type Configuration struct {
-	AppName    string `yaml:"appName"`
-	ServerPort string `yaml:"serverPort"`
-	DevMode    bool   `yaml:"devMode"`
-	LogDir     string `yaml:"logDir"`
+	AppName        string `yaml:"appName"`
+	ServerPort     string `yaml:"serverPort"`
+	GrpcServerPort string `yaml:"grpcServerPort"`
+	DevMode        bool   `yaml:"devMode"`
+	LogDir         string `yaml:"logDir"`
 }
 
 func GetDefaultConfigPath() string {
@@ -28,7 +30,7 @@ func GetDefaultConfigPath() string {
 	return configFile
 }
 
-const copyright = " Copyright ©2018-%d jialinwu.com 版权所有"
+const copyright = " Copyright ©2018-%d qnzsai.com 版权所有"
 
 var flagOnce sync.Once
 
@@ -75,6 +77,14 @@ func initConfig() (config *Configuration, err error) {
 	if config.AppName == "" {
 		config.AppName = "tplgo"
 	}
+
+	if config.GrpcServerPort == "" {
+		config.GrpcServerPort = ":18086"
+	}
+
+	strings.TrimPrefix(config.GrpcServerPort, ":")
+	config.GrpcServerPort = ":" + config.GrpcServerPort
+
 	if config.LogDir == "" {
 		curDir := path.Join(defaultConfigPath, "..", "..", "log")
 		config.LogDir = path.Join(curDir, "../log")
@@ -100,6 +110,16 @@ func initConfig() (config *Configuration, err error) {
 		Timeout: time.Second * 60,
 	}
 
+	bs, err = ioutil.ReadFile(path.Join(*ConfigFile, "..", "./gcable-addr.json"))
+	if err != nil {
+		panic(err.Error())
+	}
+	addressGcables = new(AddressGcables)
+	if err = json.Unmarshal(bs, &addressGcables.Addrs); err != nil {
+		panic(err.Error())
+	}
+	logx.Debugf("addressGcables: %+v\n", addressGcables)
+
 	return
 }
 
@@ -108,6 +128,8 @@ var once sync.Once
 var logPrefix string
 var rootConfig *Configuration
 var httpClient *http.Client
+
+var addressGcables *AddressGcables
 
 func InitConfig() *Configuration {
 	once.Do(func() {
@@ -132,4 +154,11 @@ func GetHttpClient() *http.Client {
 		panic("init config first")
 	}
 	return httpClient
+}
+
+func GetAddressGcables() *AddressGcables {
+	if addressGcables == nil {
+		panic("init config first")
+	}
+	return addressGcables
 }

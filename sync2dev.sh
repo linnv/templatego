@@ -1,3 +1,4 @@
 make clean &&make linux
-rsync  -e "ssh" -rLptvzP  --exclude-from="exclude-dd.list" ./SmartOutCall root@dd.zs:/data/go/src/SmartOutCall/SmartOutCall.pending
-ssh root@dd.zs sh /data/sh/smartoutcall-xh-restart.sh
+rsync  -e "ssh" -rLptvzP  --exclude-from="exclude.list" ./qnmock root@asr.qn:/data/go-xh/src/qnmock/qnmock.pending
+ssh root@asr.qn sh /data/sh/qnmock.sh
+

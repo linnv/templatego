@@ -1,0 +1,18 @@
+syntax="proto3";
+package gcableApi;
+
+// The service definition.
+service GcableTouble {
+  rpc CheckToubleAreaGcable (requestGcableTrouble) returns (responseGcableTrouble) {}
+}
+
+message requestGcableTrouble
+{
+    string address=1;
+}
+
+message responseGcableTrouble
+{
+    int32 status=1; //1:正常，2:故障区域
+    bool shouldGiveMoreDetail=2; //地址不够详细
+}

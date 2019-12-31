@@ -1,4 +1,5 @@
 appName: 'tplgo' #应用名称
 serverPort: 8086    #端口
+grpcServerPort: 18086    #grpc端口
 devMode: True   #开发调试模式开关
 logDir: '' #日志存放路径，if empty ,it will use $Project/log

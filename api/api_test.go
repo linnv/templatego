@@ -5,13 +5,13 @@ import (
 	"reflect"
 	"testing"
 
-	conf "github.com/linnv/templatego/config"
+	conf "github.com/linnv/qnmock/config"
 )
 
 func Test_hello(t *testing.T) {
 	conf.InitFlag()
 	flag.Parse()
-	*conf.ConfigFile = "/home/jialin/go/src/github.com/linnv/templatego/config/config.yaml"
+	*conf.ConfigFile = "/home/jialin/go/src/github.com/linnv/qnmock/config/config.yaml"
 	conf.InitConfig()
 
 	Init()

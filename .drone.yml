@@ -1,12 +1,13 @@
 workspace:
   base: /go
-  path: src/templatego
+  path: src/qnmock
 pipeline:
    backend:
-     image: golang
+     pull: true
+     image: golang:1.13
      environment:
-       # - GO111MODULE=on
-       - GOPROXY=proxy.golang.cn
+       - GO111MODULE=on
+       - GOPROXY=https://goproxy.cn
      commands:
        - make fmt-check
        - make vet
